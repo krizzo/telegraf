@@ -82,7 +82,7 @@ func (ipt *Iptables) chainList(table, chain string) (string, error) {
 	}
 	iptablesBaseArgs := "-nvL"
 	if ipt.UseLock {
-		iptablesBaseArgs = "-wnvL"
+		iptablesBaseArgs = "-w -nvL"
 	}
 	args = append(args, iptablesBaseArgs, chain, "-t", table, "-x")
 	c := exec.Command(name, args...)
