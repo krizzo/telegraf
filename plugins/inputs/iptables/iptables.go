@@ -84,16 +84,10 @@ func (ipt *Iptables) chainList(table, chain string) (string, error) {
 		name = "sudo"
 		args = append(args, iptablePath)
 	}
-	iptablesBaseArgs := "-nvL"
-	if ipt.UseLock {
-		if ipt.LockTimeout != 0 {
-			// User specificed a timeout to wait for the lock to release
-			iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout)+ " -nvL"
-		}
-		else {
-			// No timeout waiting for the lock to release
-			iptablesBaseArgs = "-w -nvL"
-		}
+	iptablesBaseArgs = "-nvL"
+	if ipt.LockTimeout != 0 {
+		// User specificed timeout in seconds to wait for the iptables lock to release
+		iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout) + " " + iptablesBaseArgs
 	}
 	args = append(args, iptablesBaseArgs, chain, "-t", table, "-x")
 	c := exec.Command(name, args...)
