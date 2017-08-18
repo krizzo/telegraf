@@ -17,6 +17,7 @@ import (
 type Iptables struct {
 	UseSudo bool
 	UseLock bool
+	LockTimeout int
 	Table   string
 	Chains  []string
 	lister  chainLister
@@ -38,6 +39,9 @@ func (ipt *Iptables) SampleConfig() string {
   ## Setting 'use_lock' to true runs iptables with the "-w" option.
   ## Adjust your sudo settings appropriately if using this option ("iptables -wnvl")
   use_lock = false
+  ## Setting 'LockTimeout' to a postive int (seconds) runs iptables with the "-w INT" option.
+  ## Adjust your sudo settings appropriately if using this option ("iptables -w * -nvl *")
+  LockTimeout = 10
   ## defines the table to monitor:
   table = "filter"
   ## defines the chains to monitor.
@@ -82,7 +86,14 @@ func (ipt *Iptables) chainList(table, chain string) (string, error) {
 	}
 	iptablesBaseArgs := "-nvL"
 	if ipt.UseLock {
-		iptablesBaseArgs = "-w -nvL"
+		if ipt.LockTimeout != 0 {
+			// User specificed a timeout to wait for the lock to release
+			iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout)+ " -nvL"
+		}
+		else {
+			// No timeout waiting for the lock to release
+			iptablesBaseArgs = "-w -nvL"
+		}
 	}
 	args = append(args, iptablesBaseArgs, chain, "-t", table, "-x")
 	c := exec.Command(name, args...)
