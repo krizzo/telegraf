@@ -32,6 +32,9 @@ You may edit your sudo configuration with the following:
 
 ```sudo
 telegraf ALL=(root) NOPASSWD: /usr/bin/iptables -nvL *
+telegraf ALL=(root) NOPASSWD: /usr/bin/iptables -w -nvL *
+telegraf ALL=(root) NOPASSWD: /usr/bin/iptables -w [[\:digit\:]] -nvL *
+telegraf ALL=(root) NOPASSWD: /usr/bin/iptables -w [[\:digit\:]][[\:digit\:]] -nvL *
 ```
 
 ### Using IPtables lock feature
@@ -45,6 +48,8 @@ Defining multiple instances of this plugin in telegraf.conf can lead to concurre
   use_sudo = false
   # run iptables with the lock option
   use_lock = false
+  # set a timeout for the lock optional, indefinite if not postive int and use_lock is true
+  lock_timeout = 0
   # defines the table to monitor:
   table = "filter"
   # defines the chains to monitor:
