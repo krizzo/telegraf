@@ -41,6 +41,7 @@ func (ipt *Iptables) SampleConfig() string {
   use_lock = false
   ## Setting 'LockTimeout' to a postive int (seconds) runs iptables with the "-w INT" option.
   ## Adjust your sudo settings appropriately if using this option ("iptables -w * -nvl *")
+  ## Value of 0, will default to wait indefinitely, per iptables man page.
   LockTimeout = 10
   ## defines the table to monitor:
   table = "filter"
@@ -84,17 +85,17 @@ func (ipt *Iptables) chainList(table, chain string) (string, error) {
 		name = "sudo"
 		args = append(args, iptablePath)
 	}
-	iptablesBaseArgs = "-nvL"
+	iptablesBaseArgs := "-nvL"
 	// This can be simplified.
 	// By treating the locktime out option as the toggle instead of a bool
 	// Leaving it in for legacy configs for now.
 	if ipt.UseLock {
-		if ipt.LockTimeout != 0 {
+		if ipt.LockTimeout > 0 {
 			// User specificed timeout in seconds to wait for the iptables lock to release
 			iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout) + " " + iptablesBaseArgs
 		} else {
 			//
-			iptablesBaseArgs = "-w " iptablesBaseArgs
+			iptablesBaseArgs = "-w " + iptablesBaseArgs
 		}
 	}
 	args = append(args, iptablesBaseArgs, chain, "-t", table, "-x")
