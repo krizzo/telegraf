@@ -85,9 +85,17 @@ func (ipt *Iptables) chainList(table, chain string) (string, error) {
 		args = append(args, iptablePath)
 	}
 	iptablesBaseArgs = "-nvL"
-	if ipt.LockTimeout != 0 {
-		// User specificed timeout in seconds to wait for the iptables lock to release
-		iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout) + " " + iptablesBaseArgs
+	// This can be simplified.
+	// By treating the locktime out option as the toggle instead of a bool
+	// Leaving it in for legacy configs for now.
+	if ipt.UseLock {
+		if ipt.LockTimeout != 0 {
+			// User specificed timeout in seconds to wait for the iptables lock to release
+			iptablesBaseArgs = "-w " + strconv.Itoa(ipt.LockTimeout) + " " + iptablesBaseArgs
+		} else {
+			//
+			iptablesBaseArgs = "-w " iptablesBaseArgs
+		}
 	}
 	args = append(args, iptablesBaseArgs, chain, "-t", table, "-x")
 	c := exec.Command(name, args...)
